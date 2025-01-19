@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Web Plugin Example</title>
+</head>
+<body>
+  <h1>WebAssembly Plugin Example</h1>
+  <p>This page loads a main module and can dynamically load side modules.</p>
+  
+  <button onclick="loadPluginA()">Load Plugin A</button>
+  <button onclick="loadPluginB()">Load Plugin B</button>
+
+  <pre id="output"></pre>
+
+  <script src="host.js"></script>
+  <script>
+    // Capture console output and display in <pre>
+    const outputEl = document.getElementById('output');
+    var originalLog = console.log;
+    console.log = function(...args) {
+      outputEl.innerText += args.join(' ') + '\n';
+      originalLog.apply(console, args);
+    };
+    var originalErr = console.error;
+    console.error = function(...args) {
+      outputEl.innerText += '[ERROR] ' + args.join(' ') + '\n';
+      originalErr.apply(console, args);
+    };
+
+    // Emscripten Module object is globally defined by host.js
+    // We'll wait until it's ready
+    Module['onRuntimeInitialized'] = () => {
+      console.log("[JS] Main module is ready.");
+    };
+
+    // Utility to fetch a plugin .wasm file, store in Emscripten FS, then call C++'s LoadPlugin
+    function loadPlugin(path) {
+      console.log("[JS] Fetching", path, "...");
+      fetch(path)
+        .then(response => response.arrayBuffer())
+        .then(buffer => {
+          // Put the file into Emscripten's virtual FS
+          FS.createDataFile('/', path, new Uint8Array(buffer), true, true);
+          console.log("[JS] File placed in FS:", path);
+
+          // Call C++ function: int LoadPlugin(const char*)
+          // ccall(signature):
+          //  1st arg: function name in C++
+          //  2nd arg: return type ('number' for int)
+          //  3rd arg: argument types array
+          //  4th arg: argument values array
+          var ret = Module.ccall('LoadPlugin', 'number', ['string'], [path]);
+          console.log("[JS] LoadPlugin returned:", ret);
+        });
+    }
+
+    function loadPluginA() {
+      loadPlugin('pluginA.wasm');
+    }
+
+    function loadPluginB() {
+      loadPlugin('pluginB.wasm');
+    }
+  </script>
+</body>
+</html>
