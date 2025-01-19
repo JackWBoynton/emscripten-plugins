@@ -1,5 +1,7 @@
 
 function(add_plugin parent libs ${ARGN})
+
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
   set(options LIBRARY_PLUGIN)
   set(oneValueArgs NAME)
   set(multiValueArgs SOURCES INCLUDES SYSTEM_INCLUDES LIBRARIES TESTS DEPENDS)
@@ -35,7 +37,12 @@ function(add_plugin parent libs ${ARGN})
 
   message(STATUS "Adding plugin ${PLUGIN_NAME} to ${parent}")
   project(${PLUGIN_NAME})
-  add_library(${PLUGIN_NAME} ${PLUGIN_LIBRARY_TYPE} ${PLUGIN_SOURCES})
+
+  if (EMSCRIPTEN)
+    add_executable(${PLUGIN_NAME} ${PLUGIN_SOURCES})
+  else()
+    add_library(${PLUGIN_NAME} ${PLUGIN_LIBRARY_TYPE} ${PLUGIN_SOURCES})
+  endif()
 
   # Add include directories and link libraries
   target_include_directories(${PLUGIN_NAME} PUBLIC ${PLUGIN_INCLUDES})
@@ -62,7 +69,7 @@ function(add_plugin parent libs ${ARGN})
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
     set_target_properties(${PLUGIN_NAME} PROPERTIES
-        LINK_FLAGS "-s SIDE_MODULE=1 -O3"
+        LINK_FLAGS "-sSIDE_MODULE=1 -O0 -sEXPORT_ALL=1 -s STANDALONE_WASM --no-entry"
     )
   endif()
 

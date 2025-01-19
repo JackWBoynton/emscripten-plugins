@@ -31,7 +31,7 @@ if (EMSCRIPTEN)
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/web"
     )
   set_target_properties(host PROPERTIES
-      LINK_FLAGS "-s MAIN_MODULE=1 -s EXPORT_ALL=1 -O3"
+      LINK_FLAGS "-s MAIN_MODULE=1 -s EXPORT_ALL=1 -sFULL_ES3=1 -O3"
     )
 else()
   # Native: put host in /native directory
