@@ -29,12 +29,12 @@ function(add_plugin parent libs ${ARGN})
       set(PLUGIN_SUFFIX ".plugin_lib")
     else()
       set(PLUGIN_SUFFIX ".plugin")
-      set(PLUGIN_LIBRARY_TYPE SHARED) # todo: benchmark vs MODULE
+      set(PLUGIN_LIBRARY_TYPE MODULE) # todo: benchmark vs MODULE
     endif()
   endif()
 
   message(STATUS "Adding plugin ${PLUGIN_NAME} to ${parent}")
-  project(${PLUGIN_NAME})
+  # project(${PLUGIN_NAME})
   add_library(${PLUGIN_NAME} ${PLUGIN_LIBRARY_TYPE} ${PLUGIN_SOURCES})
 
   # Add include directories and link libraries
@@ -45,26 +45,27 @@ function(add_plugin parent libs ${ARGN})
 
   target_compile_definitions(${PLUGIN_NAME} PRIVATE PLUGIN_NAME=${PLUGIN_NAME})
 
-  # setup_compiler_flags(${PLUGIN_NAME})
-
   # Configure build properties
-  set_target_properties(
+  if (EMSCRIPTEN)
+    set_target_properties(
     ${PLUGIN_NAME}
     PROPERTIES CXX_STANDARD 23
                PREFIX ""
-               SUFFIX ${PLUGIN_SUFFIX})
-
-
-  if (EMSCRIPTEN)
-    set_target_properties(${PLUGIN_NAME} PROPERTIES
-        SUFFIX "${PLUGIN_SUFFIX}.wasm"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-    set_target_properties(${PLUGIN_NAME} PROPERTIES
-        LINK_FLAGS "-s SIDE_MODULE=1 -O3"
-    )
+               SUFFIX ${PLUGIN_SUFFIX}.wasm
+               LINK_FLAGS "-sSIDE_MODULE=1 -O3 -sWASM=1"
+  )
+  else()
+    set_target_properties(
+    ${PLUGIN_NAME}
+    PROPERTIES CXX_STANDARD 23
+               PREFIX ""
+               SUFFIX ${PLUGIN_SUFFIX}
+  )
   endif()
+
+
+  message(STATUS "OUTPUT DIR: ${CMAKE_BINARY_DIR}/plugins")
+
 
   if(EXTERNAL_PLUGIN_BUILD)
     install(TARGETS ${PLUGIN_NAME} DESTINATION ".")

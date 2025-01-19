@@ -1,67 +1,100 @@
-<!DOCTYPE html>
-<html>
+<!--
+Note: see the shell.emscripten.html in this folder:
+we are using a custom shell, that calls coi-serviceworker.js
+
+coi-serviceworker.js was found at https://github.com/gzuidhof/coi-serviceworker, and manually patched:
+    see https://github.com/gzuidhof/coi-serviceworker/issues/20
+    and https://github.com/gzuidhof/coi-serviceworker/compare/master...tamo:coi-serviceworker:coep-ua-brand
+
+coi-serviceworker.js provides Cross-origin isolation (COOP and COEP) through a service worker
+for situations in which you can't control the headers (e.g. GitHub pages).
+
+We are also using goatcounter for simple stats
+-->
+<!doctype html>
+<html lang="en-us">
 <head>
-  <meta charset="utf-8">
-  <title>Web Plugin Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>
+    <script data-goatcounter="https://pthom-imgui-bundle.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+    <title>ImGui Bundle Demo</title>
+    <style>
+        body { margin: 0; background-color: black }
+        .emscripten {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            margin: 0px;
+            border: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: block;
+            image-rendering: optimizeSpeed;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -o-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+    </style>
 </head>
 <body>
-  <h1>WebAssembly Plugin Example</h1>
-  <p>This page loads a main module and can dynamically load side modules.</p>
-  
-  <button onclick="loadPluginA()">Load Plugin A</button>
-  <button onclick="loadPluginB()">Load Plugin B</button>
+<canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
 
-  <pre id="output"></pre>
+<!-- Call coi-serviceworker at startup -->
+<script src="coi-serviceworker.js"></script>
 
-  <script src="host.js"></script>
-  <script>
-    // Capture console output and display in <pre>
-    const outputEl = document.getElementById('output');
-    var originalLog = console.log;
-    console.log = function(...args) {
-      outputEl.innerText += args.join(' ') + '\n';
-      originalLog.apply(console, args);
+<script type='text/javascript'>
+    var Module = {
+        preRun: [],
+        postRun: [],
+        print: (function() {
+            return function(text) {
+                text = Array.prototype.slice.call(arguments).join(' ');
+                console.log(text);
+            };
+        })(),
+        printErr: function(text) {
+            text = Array.prototype.slice.call(arguments).join(' ');
+            console.error(text);
+        },
+        canvas: (function() {
+            var canvas = document.getElementById('canvas');
+            canvas.addEventListener("webglcontextlost", function(e) {
+                alert('WebGL context lost, please reload the page');
+                e.preventDefault();
+            }, false);
+
+            // Explicitly create a WebGL 2 context with stencil buffer enabled.
+            if (typeof WebGL2RenderingContext !== 'undefined') {
+                var gl = canvas.getContext('webgl2', { stencil: true });
+                if (!gl) {
+                    console.error('WebGL 2 not available, falling back to WebGL');
+                    gl = canvas.getContext('webgl', { stencil: true });
+                }
+                if (!gl) {
+                    alert('WebGL not available with stencil buffer');
+                }
+                return canvas;
+            } else {
+                alert('WebGL 2 not supported by this browser');
+            }
+        })(),
+        setStatus: function(text) {
+            console.log("status: " + text);
+        },
+        monitorRunDependencies: function(left) {
+            // no run dependencies to log
+        }
     };
-    var originalErr = console.error;
-    console.error = function(...args) {
-      outputEl.innerText += '[ERROR] ' + args.join(' ') + '\n';
-      originalErr.apply(console, args);
+    window.onerror = function() {
+        console.log("onerror: " + event);
     };
-
-    // Emscripten Module object is globally defined by host.js
-    // We'll wait until it's ready
-    Module['onRuntimeInitialized'] = () => {
-      console.log("[JS] Main module is ready.");
-    };
-
-    // Utility to fetch a plugin .wasm file, store in Emscripten FS, then call C++'s LoadPlugin
-    function loadPlugin(path) {
-      console.log("[JS] Fetching", path, "...");
-      fetch(path)
-        .then(response => response.arrayBuffer())
-        .then(buffer => {
-          // Put the file into Emscripten's virtual FS
-          FS.createDataFile('/', path, new Uint8Array(buffer), true, true);
-          console.log("[JS] File placed in FS:", path);
-
-          // Call C++ function: int LoadPlugin(const char*)
-          // ccall(signature):
-          //  1st arg: function name in C++
-          //  2nd arg: return type ('number' for int)
-          //  3rd arg: argument types array
-          //  4th arg: argument values array
-          var ret = Module.ccall('LoadPlugin', 'number', ['string'], [path]);
-          console.log("[JS] LoadPlugin returned:", ret);
-        });
-    }
-
-    function loadPluginA() {
-      loadPlugin('pluginA.wasm');
-    }
-
-    function loadPluginB() {
-      loadPlugin('pluginB.wasm');
-    }
-  </script>
+</script>
+<script src=host.js></script>
 </body>
 </html>
