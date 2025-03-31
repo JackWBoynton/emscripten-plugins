@@ -37,7 +37,7 @@ function(add_plugin parent ${ARGN})
       set(PLUGIN_SUFFIX ".plugin_lib")
     else()
       set(PLUGIN_SUFFIX ".plugin")
-      set(PLUGIN_LIBRARY_TYPE STATIC) # todo: benchmark vs MODULE
+      set(PLUGIN_LIBRARY_TYPE MODULE) # todo: benchmark vs MODULE
     endif()
   endif()
 
@@ -56,9 +56,9 @@ function(add_plugin parent ${ARGN})
     PROPERTIES CXX_STANDARD 23
                PREFIX ""
                SUFFIX ${PLUGIN_SUFFIX}.wasm
-               #LINK_FLAGS ""
   )
-  target_link_options(${PLUGIN_NAME} PRIVATE -sSIDE_MODULE=1 -O0 -sWASM=1 -sEXPORT_ALL=0 --no-entry -sASSERTIONS=1 -fwasm-exceptions -v -sERROR_ON_UNDEFINED_SYMBOLS=0)
+  target_compile_definitions(${PLUGIN_NAME} PUBLIC DEBUG=1)
+  target_link_options(${PLUGIN_NAME} PRIVATE -sSIDE_MODULE=1 -O0 -sWASM=1 -sEXPORT_ALL=1 --no-entry -sASSERTIONS=1 -fwasm-exceptions -v -sERROR_ON_UNDEFINED_SYMBOLS=0 -gsource-map)
   else()
     set_target_properties(
     ${PLUGIN_NAME}

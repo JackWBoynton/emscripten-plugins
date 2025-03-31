@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import hashlib
 import http.server
 import os
 import json
@@ -10,6 +11,19 @@ PORT = 8000
 # Directory that holds plugin files
 PLUGIN_DIR = "plugins"
 
+
+def get_sha1(file_path) -> str:
+    BUF_SIZE = 65536
+    sha1 = hashlib.sha1()
+
+    with open(file_path, 'rb') as f:
+        while True:
+            data = f.read(BUF_SIZE)
+            if not data:
+                break
+            sha1.update(data)
+
+    return sha1.hexdigest()
 
 class PluginServerHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -43,13 +57,15 @@ class PluginServerHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        # TODO: cache
         parsed_path = urlparse(self.path)
         if parsed_path.path == "/plugins":
             files = []
             if os.path.isdir(PLUGIN_DIR):
                 for f in os.listdir(PLUGIN_DIR):
                     if f.endswith(".plugin") or f.endswith(".wasm"):
-                        files.append(f)
+                        version = "fixme"
+                        files.append(dict(filename=f, size=os.path.getsize(os.path.join(PLUGIN_DIR, f)), sha1=get_sha1(os.path.join(PLUGIN_DIR, f)), version=version))
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
@@ -72,6 +88,9 @@ if __name__ == "__main__":
         f"Starting server on port {PORT}, serving from {os.path.abspath(sys.argv[1])}"
     )
     print(f"Plugins directory: {os.path.abspath(PLUGIN_DIR)}")
+    print(f"plugins: {[x for x in os.listdir(PLUGIN_DIR) if x.endswith('.plugin') or x.endswith('.wasm')]}")
+    print("Press Ctrl+C to stop the server.")
+
     server_address = ("", PORT)
     httpd = http.server.HTTPServer(server_address, PluginServerHandler)
     print(f"Open http://localhost:{PORT}/web/index.html to access the server.")
