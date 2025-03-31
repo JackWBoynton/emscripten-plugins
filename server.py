@@ -45,19 +45,13 @@ class PluginServerHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed_path = urlparse(self.path)
         if parsed_path.path == "/plugins":
-            # List files in the plugin directory
             files = []
             if os.path.isdir(PLUGIN_DIR):
                 for f in os.listdir(PLUGIN_DIR):
-                    if (
-                        f.endswith(".plugin")
-                        or f.endswith(".wasm")
-                        or f.endswith(".dll")
-                    ):
+                    if f.endswith(".plugin") or f.endswith(".wasm"):
                         files.append(f)
             self.send_response(200)
             self.send_header("Content-type", "application/json")
-            # Headers are already added in end_headers()
             self.end_headers()
             self.wfile.write(json.dumps(files).encode("utf-8"))
         else:
@@ -80,5 +74,5 @@ if __name__ == "__main__":
     print(f"Plugins directory: {os.path.abspath(PLUGIN_DIR)}")
     server_address = ("", PORT)
     httpd = http.server.HTTPServer(server_address, PluginServerHandler)
-    print(f"Open http://localhost:{PORT}/host.html to access the server.")
+    print(f"Open http://localhost:{PORT}/web/index.html to access the server.")
     httpd.serve_forever()

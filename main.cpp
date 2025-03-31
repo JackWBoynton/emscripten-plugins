@@ -4,17 +4,31 @@
 #include <string>
 #include <vector>
 
-// Include GLFW
 #include <GLFW/glfw3.h>
 
-// Dear ImGui core + backends
-#include "imgui.h"
-// #define IMGUI_IMPL_OPENGL_LOADER_GLAD or GLEW, etc.
-// but for brevity let's rely on OpenGL functions from the system or Emscripten
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "imgui.h"
 
-#include "plugin_api.h" // Suppose it declares `int pluginMain();`
+#include "plugin_api.h"
+
+static std::vector<RenderableFunc> gRenderables;
+static std::vector<void *> gPluginHandles;
+
+EMSCRIPTEN_KEEPALIVE void RegisterRenderable(RenderableFunc func) {
+  gRenderables.push_back(std::move(func));
+
+  printf("[Host] Registered renderable\n");
+}
+
+static void ShowRenderables() {
+  for (auto &renderable : gRenderables) {
+    if (ImGui::Begin("Plugin Renderable")) {
+      renderable();
+    }
+    ImGui::End();
+  }
+}
 
 // ------------- Plugin Discovery + Download Code -------------
 
@@ -112,7 +126,7 @@ void downloadAndLoadPlugin(const std::string &pluginName) {
 
   emscripten_fetch_attr_t attr;
   emscripten_fetch_attr_init(&attr);
-  attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
+  attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY | EMSCRIPTEN_FETCH_PERSIST_FILE;
   attr.onsuccess = onPluginFetchSuccess;
   attr.onerror = onPluginFetchFailed;
   attr.userData = ctx;
@@ -199,22 +213,67 @@ void downloadAndLoadPlugin(const std::string &pluginName) {
 
 #endif // end native
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
 static int LoadPluginFromFile(const char *path) {
+  std::cout << "[Host] Loading plugin: " << path << "...\n";
+
+#ifdef _WIN32
+  HMODULE handle = LoadLibraryA(path);
+  if (!handle) {
+    DWORD errorCode = GetLastError();
+    std::cerr << "LoadLibrary error: " << errorCode << "\n";
+    return -1;
+  }
+
+  typedef int (*PluginMainFunc)();
+  PluginMainFunc func = (PluginMainFunc)GetProcAddress(handle, "pluginMain");
+  if (!func) {
+    DWORD errorCode = GetLastError();
+    std::cerr << "GetProcAddress error: " << errorCode << "\n";
+    FreeLibrary(handle);
+    return -1;
+  }
+#else
   std::cout << "[Host] dlopen(" << path << ")...\n";
   void *handle = dlopen(path, RTLD_NOW);
   if (!handle) {
     std::cerr << "dlopen error: " << dlerror() << "\n";
     return -1;
   }
-  auto func = (int (*)())dlsym(handle, "pluginMain");
-  if (!func) {
-    std::cerr << "dlsym error: " << dlerror() << "\n";
+
+  typedef int (*PluginMainFunc)();
+  PluginMainFunc func = (PluginMainFunc)dlsym(handle, "pluginMain");
+  char *error = dlerror();
+  if (error != NULL) {
+    std::cerr << "dlsym error: " << error << "\n";
+    dlclose(handle);
     return -1;
   }
+#endif
+
   int ret = func();
   std::cout << "[Host] pluginMain() returned " << ret << "\n";
-  dlclose(handle);
+
+  gPluginHandles.push_back(handle);
+
   return ret;
+}
+
+static void UnloadPlugins() {
+  gRenderables.clear();
+  for (auto handle : gPluginHandles) {
+    std::cout << "[Host] Unloading plugin...\n";
+    #ifdef _WIN32
+      FreeLibrary(handle);
+    #else
+      dlclose(handle);
+    #endif
+  }
 }
 
 // ------------- ImGui UI -------------
@@ -268,6 +327,8 @@ static void FrameLoop() {
   // Show our plugin manager
   ShowPluginManagerWindow();
 
+  ShowRenderables();
+
   // Render
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -315,6 +376,8 @@ int main() {
   ImGui::DestroyContext();
   glfwDestroyWindow(gWindow);
   glfwTerminate();
+
+  UnloadPlugins();
   return 0;
 }
 #else
@@ -339,10 +402,6 @@ int main() {
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
 
-  // If you use GL loader (GLEW, GLAD, etc.), init it here:
-  // glewInit() or gladLoadGL() etc.
-
-  // Setup Dear ImGui
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
@@ -350,13 +409,10 @@ int main() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init("#version 330"); // GL 3.3 on desktop
 
-  // Optionally init curl
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
-  // Main loop
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
-    // Render
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
@@ -370,18 +426,21 @@ int main() {
     // Our plugin manager UI
     ShowPluginManagerWindow();
 
+    ShowRenderables();
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);
   }
 
-  // Cleanup
   curl_global_cleanup();
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
   glfwDestroyWindow(window);
   glfwTerminate();
+
+  UnloadPlugins();
   return 0;
 }
 #endif

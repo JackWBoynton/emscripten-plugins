@@ -4,7 +4,6 @@ include("${PLUGIN_SYSTEM_BASE_FOLDER}/cmake/plugin.cmake")
 
 add_plugin(
   lib
-  ""
   NAME
   plugin_b
   SOURCES
