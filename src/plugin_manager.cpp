@@ -26,8 +26,14 @@
 #include <dlfcn.h>
 #endif
 
+#if defined(EMSCRIPTEN)
 static const char* PLUGIN_LIST_URL = "http://localhost:8000/plugins";
 static const char* PLUGIN_BASE_URL = "http://localhost:8000/plugins/";
+#else
+static const char* PLUGIN_LIST_URL = "http://localhost:8000/plugins";
+static const char* PLUGIN_BASE_URL = "http://localhost:8000/plugins/";
+#endif
+
 #if defined(__APPLE__)
 static const char* PLUGIN_DEST = "~/Library/Application Support/plugin_dev/plugins/";
 #elif defined(_WIN32)
