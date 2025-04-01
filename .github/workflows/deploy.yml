@@ -207,7 +207,7 @@ jobs:
           # Organize Emscripten build
           if [ -d plugins/plugins-emscripten ]; then
             mkdir -p plugins_combined/emscripten
-            cp -r plugins/plugins-emscripten/*.wasm plugins_combined/emscripten/
+            cp -r plugins/plugins-emscripten/*/**.wasm plugins_combined/emscripten/
           fi
 
           # Copy the combined plugins into the server directory (adjust the path as needed)
