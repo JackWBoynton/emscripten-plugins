@@ -21,7 +21,7 @@ if (NOT EMSCRIPTEN)
 endif()
 
 add_subdirectory(external/json)
-set(HELLOIMGUI_DOWNLOAD_FREETYPE_IF_NEEDED ON)
+set(HELLOIMGUI_DOWNLOAD_FREETYPE_IF_NEEDED ON CACHE BOOL "Download freetype if not found" FORCE)
 add_subdirectory(external/hello_imgui)
 get_target_property(hello_imgui_incl hello_imgui INTERFACE_INCLUDE_DIRECTORIES)
 
