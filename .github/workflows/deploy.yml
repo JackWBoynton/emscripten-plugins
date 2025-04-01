@@ -73,6 +73,7 @@ jobs:
 
       - name: Configure and Build macOS Plugins for ${{ matrix.arch }}
         run: |
+          brew install cmake glfw3 curl
           mkdir -p build/macos-${{ matrix.arch }}
           cd build/macos-${{ matrix.arch }}
           cmake ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
