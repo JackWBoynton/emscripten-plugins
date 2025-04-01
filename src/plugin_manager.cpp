@@ -490,7 +490,7 @@ int PluginManager::loadPlugin(LoadablePlugin &plugin)
 
     log("SHA1 match for plugin: " + plugin.name);
 
-    int res = loadPluginFromFile(plugin.downloadedPath);
+    int res = loadPluginFromFile(plugin.downloadedPath.string());
     if (res >= 0) {
         plugin.loaded = true;
     }
@@ -546,7 +546,7 @@ void PluginManager::unloadAll()
     renderables_.clear();
 #if defined(_WIN32)
     for (auto handle : pluginHandles_) {
-        FreeLibrary(handle);
+        FreeLibrary(static_cast<HMODULE>(handle));
     }
 #else
     for (auto handle : pluginHandles_) {

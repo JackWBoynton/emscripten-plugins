@@ -39,6 +39,10 @@ get_target_property(imgui_incl imgui INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(nlohmann_json_incl nlohmann_json INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(lib PUBLIC ${imgui_incl} ${nlohmann_json_incl})
 
+if(WIN32 AND NOT EMSCRIPTEN)
+  set_target_properties(lib PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/plugin.cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/helpers.cmake")
 
