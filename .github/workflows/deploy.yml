@@ -123,7 +123,7 @@ jobs:
           source ./emsdk/emsdk_env.sh
           mkdir -p build/emscripten
           cd build/emscripten
-          emcmake cmake ../../ -DCMAKE_BUILD_TYPE=Release
+          emcmake cmake ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5
           emmake make
           cd ../..
       
