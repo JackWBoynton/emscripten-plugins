@@ -17,7 +17,11 @@ set(LIB_SOURCES
 )
 
 if (NOT EMSCRIPTEN)
-  find_package(CURL REQUIRED)
+  if (WIN32)
+    find_package(curl REQUIRED)
+  else()
+    find_package(CURL REQUIRED)
+  endif()
 endif()
 
 add_subdirectory(external/json)
