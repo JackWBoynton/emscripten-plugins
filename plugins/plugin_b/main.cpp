@@ -1,5 +1,5 @@
 // pluginB.cpp
-#include "plugin_api.h"
+#include "lib/plugin_api.h"
 #include <stdio.h>
 
 #if defined(EMSCRIPTEN)
