@@ -29,7 +29,7 @@ set(HELLOIMGUI_DOWNLOAD_FREETYPE_IF_NEEDED ON CACHE BOOL "Download freetype if n
 add_subdirectory(external/hello_imgui)
 get_target_property(hello_imgui_incl hello_imgui INTERFACE_INCLUDE_DIRECTORIES)
 
-add_library(lib STATIC ${LIB_SOURCES})
+add_library(lib SHARED ${LIB_SOURCES})
 target_include_directories(lib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
     ${hello_imgui_incl}
