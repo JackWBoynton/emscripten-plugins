@@ -1,4 +1,4 @@
-FROM ubuntu:22.04 AS build_plugins
+FROM ubuntu:24.04 AS build_plugins
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y build-essential cmake pkg-config libglm-dev libglfw3-dev libssl-dev libcurl4-openssl-dev gcc-13 g++-13
 WORKDIR /app
