@@ -19,10 +19,6 @@ function(add_plugin parent ${ARGN})
     message(FATAL_ERROR "Target ${parent} does not exist")
   endif()
 
-  if(DEFINED PLUGIN_NAME)
-    message(STATUS "Compiling plugin ${PLUGIN_NAME}")
-  endif()
-
   if(STATIC_LINK_PLUGINS)
     set(PLUGIN_LIBRARY_TYPE STATIC)
 

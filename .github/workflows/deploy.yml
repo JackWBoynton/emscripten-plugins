@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [amd64, arm64]
+        arch: [amd64, ] #, arm64]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -82,7 +82,8 @@ jobs:
 
       - name: Configure and Build macOS Plugins for ${{ matrix.arch }}
         run: |
-          brew install cmake glfw3 curl
+          brew install cmake curl
+          brew install --universal glfw3
           mkdir -p build/macos-${{ matrix.arch }}
           cd build/macos-${{ matrix.arch }}
           cmake ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
