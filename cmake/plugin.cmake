@@ -1,12 +1,5 @@
 
 
-if(NOT TARGET lib_wrap)
-add_library(lib_wrap INTERFACE)
-get_target_property(incs lib INTERFACE_INCLUDE_DIRECTORIES)
-target_include_directories(lib_wrap INTERFACE ${incs})
-endif()
-
-
 function(add_plugin parent ${ARGN})
   set(options LIBRARY_PLUGIN)
   set(oneValueArgs NAME)
@@ -68,7 +61,7 @@ function(add_plugin parent ${ARGN})
   target_include_directories(${PLUGIN_NAME} PUBLIC ${PLUGIN_INCLUDES})
   target_include_directories(${PLUGIN_NAME} SYSTEM PUBLIC ${PLUGIN_SYSTEM_INCLUDES})
   target_link_libraries(${PLUGIN_NAME} PUBLIC ${PLUGIN_LIBRARIES})
-  target_link_libraries(${PLUGIN_NAME} PRIVATE lib_wrap)
+  target_link_libraries(${PLUGIN_NAME} PRIVATE lib)
 
   target_compile_definitions(${PLUGIN_NAME} PRIVATE PLUGIN_NAME=${PLUGIN_NAME})
 
