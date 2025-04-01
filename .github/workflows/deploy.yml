@@ -30,7 +30,7 @@ jobs:
           mkdir -p build/linux-${{ matrix.arch }}
           docker buildx build \
             --platform linux/${{ matrix.arch }} \
-            --target build_plugins \
+            --target export_artifacts \
             --output "type=local,dest=build/linux-${{ matrix.arch }}" .
 
       - name: Upload Linux Plugin Artifact for ${{ matrix.arch }}

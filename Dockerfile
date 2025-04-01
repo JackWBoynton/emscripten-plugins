@@ -5,6 +5,11 @@ WORKDIR /app
 COPY . .
 RUN mkdir -p build && cd build && CC=gcc-13 CXX=g++-13 cmake .. && make
 
+FROM scratch AS export_artifacts
+WORKDIR /artifacts
+COPY --from=build_plugins /app/build .
+
+
 FROM python:3.11-alpine
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
