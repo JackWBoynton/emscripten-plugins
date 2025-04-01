@@ -92,8 +92,9 @@ Found in the `plugins/` directory.
 
 1. Clone this repository.  
 2. Build using CMake.  
-3a. Run `python3 server.py build` to start a local server for hosting plugins.
-3b. Run `./native/host`, and watch the console output.  
+3. Run the application:
+  - Run `python3 server.py build` to start a local server for hosting plugins.
+  - Run `./native/host`, and watch the console output.  
 4. Modify or create plugins in `plugins/`.  
 5. Rebuild and re-run to see your new functionality in action!
 
