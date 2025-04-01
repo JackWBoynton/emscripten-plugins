@@ -39,59 +39,59 @@ jobs:
           name: plugins-linux-${{ matrix.arch }}
           path: build/linux-${{ matrix.arch }}/**/*.plugin
 
-    build-windows:
-      runs-on: windows-2022
-      name: 🪟 Windows MINGW64
+  build-windows:
+    runs-on: windows-2022
+    name: 🪟 Windows MINGW64
 
-      defaults:
-        run:
-          shell: msys2 {0}
+    defaults:
+      run:
+        shell: msys2 {0}
 
-      env:
-        CCACHE_DIR: "${{ github.workspace }}/.ccache"
+    env:
+      CCACHE_DIR: "${{ github.workspace }}/.ccache"
 
-      permissions:
-        id-token: write
-        attestations: write
+    permissions:
+      id-token: write
+      attestations: write
 
-      steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
-      - name: Setup ccache
-        uses:  hendrikmuhs/ccache-action@v1
-        id:    cache-ccache
-        with:
-          key: ${{ runner.os }}-mingw-ccache-${{ github.run_id }}
-          restore-keys: ${{ runner.os }}-mingw-ccache
-          max-size: 1G
+    - name: Setup ccache
+      uses:  hendrikmuhs/ccache-action@v1
+      id:    cache-ccache
+      with:
+        key: ${{ runner.os }}-mingw-ccache-${{ github.run_id }}
+        restore-keys: ${{ runner.os }}-mingw-ccache
+        max-size: 1G
 
-      - name: Install msys2
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: mingw64
+    - name: Install msys2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: mingw64
 
-      - name: Install dependencies
-        run: |
-          set -x
-          scripts/get_deps_mingw.sh
+    - name: Install dependencies
+      run: |
+        set -x
+        scripts/get_deps_mingw.sh
 
-      - name: Configure CMake
-        run: |
-          set -x
-          mkdir -p build\windows
-          cd build\windows
+    - name: Configure CMake
+      run: |
+        set -x
+        mkdir -p build\windows
+        cd build\windows
 
-          cmake ..\..
-          cmake --build . --config Release
+        cmake ..\..
+        cmake --build . --config Release
 
-      - name: Upload Windows Plugin Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: plugins-windows
-          path: build/windows/*/**.plugin
+    - name: Upload Windows Plugin Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: plugins-windows
+        path: build/windows/*/**.plugin
 
   build-macos:
     name: Build macOS Plugins
