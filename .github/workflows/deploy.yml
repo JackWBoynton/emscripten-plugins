@@ -39,31 +39,54 @@ jobs:
           name: plugins-linux-${{ matrix.arch }}
           path: build/linux-${{ matrix.arch }}/**/*.plugin
 
-  build-windows:
-    name: Build Windows Plugins
-    runs-on: windows-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    build-windows:
+      runs-on: windows-2022
+      name: 🪟 Windows MINGW64
 
-      - name: update submodules
-        run: git submodule update --init --recursive
+      defaults:
+        run:
+          shell: msys2 {0}
 
-      - name: Install CMake
-        run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
-      
-      - name: Configure and Build Windows Plugins
+      env:
+        CCACHE_DIR: "${{ github.workspace }}/.ccache"
+
+      permissions:
+        id-token: write
+        attestations: write
+
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup ccache
+        uses:  hendrikmuhs/ccache-action@v1
+        id:    cache-ccache
+        with:
+          key: ${{ runner.os }}-mingw-ccache-${{ github.run_id }}
+          restore-keys: ${{ runner.os }}-mingw-ccache
+          max-size: 1G
+
+      - name: Install msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: mingw64
+
+      - name: Install dependencies
         run: |
-          choco install glfw3 --installargs 'ADD_CMAKE_TO_PATH=System' -y
-          choco install curl --installargs 'ADD_CMAKE_TO_PATH=System' -y
+          set -x
+          scripts/get_deps_mingw.sh
 
-          mkdir build\windows
+      - name: Configure CMake
+        run: |
+          set -x
+          mkdir -p build\windows
           cd build\windows
-          cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+
+          cmake ..\..
           cmake --build . --config Release
-          cd ../..
-        shell: powershell
-      
+
       - name: Upload Windows Plugin Artifact
         uses: actions/upload-artifact@v4
         with:
