@@ -207,7 +207,7 @@ jobs:
           # Organize Emscripten build
           if [ -d plugins/plugins-emscripten ]; then
             mkdir -p plugins_combined/emscripten
-            cp -r plugins/plugins-emscripten/* plugins_combined/emscripten/
+            cp -r plugins/plugins-emscripten/*.wasm plugins_combined/emscripten/
           fi
 
           # Copy the combined plugins into the server directory (adjust the path as needed)
@@ -216,7 +216,7 @@ jobs:
 
           # copy built web dir to server dir
           mkdir -p server/web
-          cp -r build/emscripten/web/* server/web/
+          cp -r plugins/plugins-emscripten/web/* server/web/
 
       - name: Log in to Heroku Container Registry
         run: |
