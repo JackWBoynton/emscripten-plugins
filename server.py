@@ -90,7 +90,6 @@ class PluginServerHandler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     # Change working directory to serve files correctly
-    os.chdir(os.path.abspath(sys.argv[1]))
 
     # Ensure the plugins directory exists
     if not os.path.isdir(PLUGIN_DIR):
@@ -103,6 +102,8 @@ if __name__ == "__main__":
     print(f"Plugins directory: {os.path.abspath(PLUGIN_DIR)}")
     print(f"plugins: {[x for x in os.listdir(PLUGIN_DIR) if x.endswith('.plugin') or x.endswith('.wasm')]}")
     print("Press Ctrl+C to stop the server.")
+
+    os.chdir(os.path.abspath(sys.argv[1]))
 
     server_address = ("", PORT)
     httpd = http.server.HTTPServer(server_address, PluginServerHandler)

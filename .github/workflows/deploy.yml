@@ -155,7 +155,9 @@ jobs:
         with:
           name: plugins-emscripten
           # we only want the .wasms
-          path: build/emscripten/*/**.wasm
+          path: |
+              build/emscripten/*/**.wasm
+              build/emscripten/web
 
   deploy:
     name: Assemble Plugins & Deploy Docker Image to Heroku
