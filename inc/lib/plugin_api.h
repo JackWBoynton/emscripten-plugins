@@ -15,7 +15,7 @@ int pluginMain();
 
 inline const char* getPluginArchitecture() {
   #if defined(EMSCRIPTEN)
-    return "wasm32";
+    return "emscripten";
   #elif defined(__APPLE__)
     #if defined(__arm64__) || defined(__aarch64__)
       return "macos_arm64";
