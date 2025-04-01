@@ -4,15 +4,12 @@
 #include <emscripten.h>
 #endif
 
-#include <GLFW/glfw3.h>
-#include "imgui.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
-
 #include <iostream>
 #include <chrono>
 
-static GLFWwindow* gWindow = nullptr;
+#include <hello_imgui/hello_imgui.h>
+#include "hello_imgui/runner_params.h"
+
 static AppHost* gStaticHost = nullptr;
 
 static uint64_t GetTimeMs()
@@ -21,9 +18,16 @@ return std::chrono::duration_cast<std::chrono::milliseconds>(
     std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-static void ShowPluginManagerWindow()
+void AppHost::ShowPluginManagerWindow()
 {
-    ImGui::Begin("Plugin Manager");
+    if (!m_loadedDownloadedPlugins) {
+        if (!PluginManager::getInstance().getPluginList().empty() || GetTimeMs() > m_serverTimeoutMs) {
+            PluginManager::getInstance().loadPreDownloadedPlugins();
+            m_loadedDownloadedPlugins = true;
+        }
+    }
+
+
     if (ImGui::Button("Refresh Plugin List")) {
         PluginManager::getInstance().fetchPluginList();
     }
@@ -41,7 +45,6 @@ static void ShowPluginManagerWindow()
     if (ImGui::Button("Download & Load") && selectedPlugin >= 0) {
         PluginManager::getInstance().downloadAndLoadPlugin(list[selectedPlugin]);
     }
-    ImGui::End();
 }
 
 static void ShowRenderables()
@@ -83,129 +86,64 @@ AppHost::AppHost()
 #endif
 }
 
+static std::shared_ptr<HelloImGui::DockableWindow> s_featuresDemoWindow;
+
+void AppHost::CreateDockableWindows()
+{
+    static bool first = true;
+    if (first)
+    {
+        first = false;
+        s_featuresDemoWindow = std::make_shared<HelloImGui::DockableWindow>();
+        s_featuresDemoWindow->label = "Plugin Manager";
+        s_featuresDemoWindow->dockSpaceName = "MainDockSpace";
+        s_featuresDemoWindow->GuiFunction = [&] { ShowPluginManagerWindow(); };
+        s_featuresDemoWindow->isVisible = true;
+
+        HelloImGui::AddDockableWindow(s_featuresDemoWindow, true);
+
+        printf("[AppHost] Created dockable window: %s\n", s_featuresDemoWindow->label.c_str());
+    }
+}
+
+HelloImGui::DockingParams AppHost::CreateDefaultLayout()
+{
+    CreateDockableWindows();
+
+    HelloImGui::DockingParams dockingParams;
+    dockingParams.dockingSplits = {
+        { "MainDockSpace", "CommandSpace", ImGuiDir_Down, 0.5f },
+        { "MainDockSpace", "MiscDockSpace", ImGuiDir_Right, 0.5f }
+    };
+    return dockingParams;
+}
+
 int AppHost::run()
 {
     printf("[AppHost] Starting application...\n");
-#ifdef EMSCRIPTEN
-    // Emscripten environment
-    if (!glfwInit()) {
-        std::cerr << "[Emscripten] Failed to init GLFW.\n";
-        return 1;
-    }
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-    gWindow = glfwCreateWindow(1280, 720, "Emscripten + Plugins", NULL, NULL);
-    if (!gWindow) {
-        std::cerr << "[Emscripten] Failed to create GLFW window.\n";
-        glfwTerminate();
-        return 1;
-    }
-    glfwMakeContextCurrent(gWindow);
-    glfwSwapInterval(1);
+    HelloImGui::RunnerParams runnerParams;
+    runnerParams.appWindowParams.windowTitle = "Plugin Host";
+    runnerParams.appWindowParams.windowGeometry.size = {1280, 720};
+    runnerParams.appWindowParams.restorePreviousGeometry = true;
 
-    setupCommonImGuiState();
+    runnerParams.dockingParams = CreateDefaultLayout();
+
+    runnerParams.imGuiWindowParams.showMenuBar = true;
+
+    runnerParams.imGuiWindowParams.defaultImGuiWindowType = HelloImGui::DefaultImGuiWindowType::ProvideFullScreenDockSpace;
+
+    runnerParams.imGuiWindowParams.enableViewports = false;
+
+    runnerParams.dockingParams.layoutCondition = HelloImGui::DockingLayoutCondition::FirstUseEver;
+    runnerParams.iniFolderType = HelloImGui::IniFolderType::AppUserConfigFolder;
+    runnerParams.iniFilename = "plugins-dev/plugins-dev.ini";
+
     PluginManager::getInstance().fetchPluginList();
 
-    emscripten_set_main_loop(emscriptenFrameLoop, 0, true);
+    HelloImGui::Run(runnerParams);
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-    glfwDestroyWindow(gWindow);
-    glfwTerminate();
-    return 0;
-#else
-    if (!glfwInit()) {
-        std::cerr << "[Native] Failed to init GLFW.\n";
-        return 1;
-    }
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    gWindow = glfwCreateWindow(1280, 720, "Native + Plugins", NULL, NULL);
-    if (!gWindow) {
-        std::cerr << "[Native] Failed to create GLFW window.\n";
-        glfwTerminate();
-        return 1;
-    }
-    glfwMakeContextCurrent(gWindow);
-    glfwSwapInterval(1);
-
-    setupCommonImGuiState();
-    PluginManager::getInstance().fetchPluginList();
-
-    while (!glfwWindowShouldClose(gWindow)) {
-        pollAndRender();
-    }
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-    glfwDestroyWindow(gWindow);
-    glfwTerminate();
     PluginManager::getInstance().unloadAll();
-    return 0;
-#endif
+
+    return EXIT_SUCCESS;
 }
-
-void AppHost::setupCommonImGuiState()
-{
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-#ifdef EMSCRIPTEN
-    ImGui_ImplGlfw_InitForOpenGL(gWindow, true);
-    ImGui_ImplOpenGL3_Init("#version 300 es");
-#else
-    ImGui_ImplGlfw_InitForOpenGL(gWindow, true);
-    ImGui_ImplOpenGL3_Init("#version 330");
-#endif
-}
-
-void AppHost::pollAndRender()
-{
-    if (!m_loadedDownloadedPlugins) {
-        if (!PluginManager::getInstance().getPluginList().empty() || GetTimeMs() > m_serverTimeoutMs) {
-            PluginManager::getInstance().loadPreDownloadedPlugins();
-            m_loadedDownloadedPlugins = true;
-        }
-    }
-
-    glfwPollEvents();
-
-    int display_w, display_h;
-    glfwGetFramebufferSize(gWindow, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    ShowPluginManagerWindow();
-    ShowRenderables();
-
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    glfwSwapBuffers(gWindow);
-}
-
-#ifdef EMSCRIPTEN
-void AppHost::emscriptenFrameLoop()
-{
-    gStaticHost->pollAndRender();
-    if (glfwWindowShouldClose(gWindow)) {
-        emscripten_cancel_main_loop();
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
-        glfwDestroyWindow(gWindow);
-        glfwTerminate();
-        PluginManager::getInstance().unloadAll();
-    }
-}
-#endif

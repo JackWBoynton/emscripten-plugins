@@ -4,3 +4,6 @@
 [submodule "external/json"]
 	path = external/json
 	url = https://github.com/nlohmann/json
+[submodule "external/hello_imgui"]
+	path = external/hello_imgui
+	url = https://github.com/JackWBoynton/hello_imgui.git
