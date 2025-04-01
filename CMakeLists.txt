@@ -21,6 +21,7 @@ set(LIB_SOURCES
 if (NOT EMSCRIPTEN)
   find_package(CURL REQUIRED)
   find_package(OpenGL REQUIRED)
+  find_package(glfw REQUIRED)
 endif()
 
 add_subdirectory(external/json)
@@ -29,7 +30,7 @@ add_library(lib STATIC ${LIB_SOURCES})
 target_include_directories(lib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
 )
-target_link_libraries(lib PUBLIC imgui ${CURL_LIBRARIES} ${OPENGL_LIBRARIES} nlohmann_json::nlohmann_json)
+target_link_libraries(lib PUBLIC imgui ${glfw_LIBRARIES} ${CURL_LIBRARIES} ${OPENGL_LIBRARIES} nlohmann_json::nlohmann_json)
 get_target_property(imgui_incl imgui INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(nlohmann_json_incl nlohmann_json INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(lib PUBLIC ${imgui_incl} ${nlohmann_json_incl})
