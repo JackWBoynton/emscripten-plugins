@@ -16,6 +16,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: submodule update
+        run: git submodule update --init --recursive
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
@@ -42,6 +45,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: submodule update
+        run: git submodule update --init --recursive
       
       - name: Install CMake
         run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
@@ -71,6 +77,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: submodule update
+        run: git submodule update --init --recursive
+
       - name: Configure and Build macOS Plugins for ${{ matrix.arch }}
         run: |
           brew install cmake glfw3 curl
@@ -92,6 +101,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: submodule update
+        run: git submodule update --init --recursive
       
       - name: Install Emscripten SDK
         run: |
