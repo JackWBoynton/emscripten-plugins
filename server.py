@@ -9,7 +9,8 @@ from urllib.parse import urlparse
 PORT = 8000
 
 # Directory that holds plugin files
-PLUGIN_DIR = "plugins"
+PLUGIN_DIR = os.getenv("PLUGIN_DIR", os.path.join(os.getcwd(), "server/plugins"))
+WEB_BUILD_DIR = os.getenv("WEB_BUILD_DIR", os.path.join(os.getcwd(), "server/web"))
 
 
 def get_sha1(file_path) -> str:
@@ -70,6 +71,18 @@ class PluginServerHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header("Content-type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps(files).encode("utf-8"))
+
+        elif parsed_path.path == "/web":
+            # Serve the web directory
+            web_path = os.path.join(WEB_BUILD_DIR, parsed_path.path[5:])
+            if os.path.isdir(web_path):
+                self.send_response(200)
+                self.send_header("Content-type", "text/html")
+                self.end_headers()
+                with open(os.path.join(web_path, "index.html"), "rb") as f:
+                    self.wfile.write(f.read())
+            else:
+                self.send_error(404, "File not found")
         else:
             # Serve static files (including /plugins/<filename>)
             super().do_GET()
