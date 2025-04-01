@@ -43,7 +43,7 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/helpers.cmake")
 # Host (executable)
 #
 set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-hello_imgui_add_app(host ${SOURCES})
+hello_imgui_add_app(host ${SOURCES} OFF)
 
 if (EMSCRIPTEN)
   set_target_properties(host PROPERTIES
