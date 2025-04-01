@@ -30,8 +30,7 @@ target_include_directories(lib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
     ${hello_imgui_incl}
 )
-target_link_libraries(lib PUBLIC ${CURL_LIBRARIES} nlohmann_json::nlohmann_json)
-target_link_libraries(lib PRIVATE hello-imgui::hello_imgui)
+target_link_libraries(lib PUBLIC ${CURL_LIBRARIES} nlohmann_json::nlohmann_json hello_imgui)
 get_target_property(imgui_incl imgui INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(nlohmann_json_incl nlohmann_json INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(lib PUBLIC ${imgui_incl} ${nlohmann_json_incl})
@@ -73,4 +72,4 @@ endif()
 
 detect_and_add_plugins()
 
-target_link_libraries(host PUBLIC lib)
+target_link_libraries(host PRIVATE lib)
