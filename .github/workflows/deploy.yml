@@ -14,10 +14,8 @@ jobs:
         arch: [amd64, arm64]
     steps:
       - name: Checkout repository
+        submodules: true
         uses: actions/checkout@v3
-
-      - name: submodule update
-        run: git submodule update --init --recursive
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -44,11 +42,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
+        submodules: true
         uses: actions/checkout@v3
 
-      - name: submodule update
-        run: git submodule update --init --recursive
-      
       - name: Install CMake
         run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
       
@@ -75,10 +71,8 @@ jobs:
         arch: [x86_64, arm64]
     steps:
       - name: Checkout repository
+        submodules: true
         uses: actions/checkout@v3
-
-      - name: submodule update
-        run: git submodule update --init --recursive
 
       - name: Configure and Build macOS Plugins for ${{ matrix.arch }}
         run: |
@@ -100,13 +94,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
+        submodules: true
         uses: actions/checkout@v3
 
-      - name: submodule update
-        run: git submodule update --init --recursive
-      
       - name: Install Emscripten SDK
         run: |
+          apt-get update && apt-get install -y python3 git cmake build-essential
           git clone https://github.com/emscripten-core/emsdk.git
           cd emsdk
           ./emsdk install latest
