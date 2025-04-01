@@ -41,7 +41,7 @@ jobs:
 
   build-windows:
     runs-on: windows-2022
-    name: 🪟 Windows MINGW64
+    name: Windows MINGW64
 
     defaults:
       run:
@@ -81,10 +81,10 @@ jobs:
     - name: Configure CMake
       run: |
         set -x
-        mkdir -p build\windows
-        cd build\windows
+        mkdir -p build/windows
+        cd build/windows
 
-        cmake ..\..
+        cmake ../..
         cmake --build . --config Release
 
     - name: Upload Windows Plugin Artifact
