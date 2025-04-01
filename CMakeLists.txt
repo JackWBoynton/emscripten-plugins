@@ -21,6 +21,7 @@ if (NOT EMSCRIPTEN)
 endif()
 
 add_subdirectory(external/json)
+set(HELLOIMGUI_DOWNLOAD_FREETYPE_IF_NEEDED ON)
 add_subdirectory(external/hello_imgui)
 get_target_property(hello_imgui_incl hello_imgui INTERFACE_INCLUDE_DIRECTORIES)
 
