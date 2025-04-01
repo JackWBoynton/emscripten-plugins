@@ -14,8 +14,8 @@ jobs:
         arch: [amd64, arm64]
     steps:
       - name: Checkout repository
-        submodules: true
         uses: actions/checkout@v3
+        submodules: true
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -42,8 +42,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
-        submodules: true
         uses: actions/checkout@v3
+        submodules: true
 
       - name: Install CMake
         run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
@@ -71,8 +71,8 @@ jobs:
         arch: [x86_64, arm64]
     steps:
       - name: Checkout repository
-        submodules: true
         uses: actions/checkout@v3
+        submodules: true
 
       - name: Configure and Build macOS Plugins for ${{ matrix.arch }}
         run: |
@@ -94,8 +94,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        submodules: true
         uses: actions/checkout@v3
+        submodules: true
 
       - name: Install Emscripten SDK
         run: |
