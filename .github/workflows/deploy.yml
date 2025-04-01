@@ -54,6 +54,9 @@ jobs:
       
       - name: Configure and Build Windows Plugins
         run: |
+          choco install glfw3 --installargs 'ADD_CMAKE_TO_PATH=System' -y
+          choco install curl --installargs 'ADD_CMAKE_TO_PATH=System' -y
+
           mkdir build\windows
           cd build\windows
           cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
