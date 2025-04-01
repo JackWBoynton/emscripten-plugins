@@ -40,6 +40,10 @@ static const char* PLUGIN_DEST = "~/Library/Application Support/plugin_dev/plugi
 static const char* PLUGIN_DEST = "C:\\Users\\<username>\\AppData\\Roaming\\plugin_dev\\plugins\\";
 #elif defined(EMSCRIPTEN)
 static const char* PLUGIN_DEST = "/plugins/";
+#elif defined(__linux__)
+static const char* PLUGIN_DEST = "~/.local/share/plugin_dev/plugins/";
+#else
+#error "Unknown platform"
 #endif
 
 #include <format>
