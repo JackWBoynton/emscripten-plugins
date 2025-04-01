@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: plugins-linux-${{ matrix.arch }}
-          path: build/linux-${{ matrix.arch }}
+          path: build/linux-${{ matrix.arch }}/**/*.plugin
 
   build-windows:
     name: Build Windows Plugins
@@ -65,7 +65,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: plugins-windows
-          path: build/windows
+          path: build/windows/*/**.plugin
 
   build-macos:
     name: Build macOS Plugins
@@ -93,7 +93,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: plugins-macos-${{ matrix.arch }}
-          path: build/macos-${{ matrix.arch }}
+          path: build/macos-${{ matrix.arch }}/*/**.plugin
 
   build-emscripten:
     name: Build Emscripten Plugins
@@ -128,7 +128,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: plugins-emscripten
-          path: build/emscripten
+          # we only want the .wasms
+          path: build/emscripten/*/**.wasm
 
   deploy:
     name: Assemble Plugins & Deploy Docker Image to Heroku

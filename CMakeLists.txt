@@ -19,7 +19,7 @@ set(LIB_SOURCES
 )
 
 if (NOT EMSCRIPTEN)
-  find_package(curl REQUIRED)
+  find_package(CURL REQUIRED)
   find_package(OpenGL REQUIRED)
 endif()
 
