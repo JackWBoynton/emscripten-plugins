@@ -174,6 +174,6 @@ From the build directory:
 To avoid local dependency issues:  
 ```
 docker build -t plugin_app_container .
-docker run --rm -it plugin_app_container
+docker run -p 8000:8000 --rm -it plugin_app_container
 ```
 The Docker container will compile and run the example application. Adjust the Dockerfile if you need additional libraries or a different environment.
