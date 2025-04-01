@@ -22,4 +22,4 @@ USER appuser
 
 EXPOSE ${PORT}
 
-CMD ["python3", "server.py", "/app/build"]
+CMD ["python3", "server.py", "/app/server"]
