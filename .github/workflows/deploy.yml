@@ -218,6 +218,8 @@ jobs:
           mkdir -p server/web
           cp -r plugins/plugins-emscripten/web/* server/web/
 
+          tree -a server
+
       - name: Log in to Heroku Container Registry
         run: |
           echo "$HEROKU_API_KEY" | docker login --username=_ --password-stdin registry.heroku.com
@@ -228,6 +230,7 @@ jobs:
         run: |
           docker buildx build \
             --platform linux/amd64 \
+            --target server \
             -t registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web \
             --push .
 

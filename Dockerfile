@@ -10,7 +10,7 @@ WORKDIR /artifacts
 COPY --from=build_plugins /app/build .
 
 
-FROM python:3.11-alpine
+FROM python:3.11-alpine as server
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
