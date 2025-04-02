@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: plugins-linux-${{ matrix.arch }}
-          path: build/linux-${{ matrix.arch }}/**/*.plugin
+          path: build/linux-${{ matrix.arch }}/plugins/linux-${{ matrix.arch }}/
 
   build-windows:
     runs-on: windows-2022
@@ -91,7 +91,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: plugins-windows
-        path: build/windows/*/**.plugin
+        path: build/windows/plugins/windows-amd64/
 
   build-macos:
     name: Build macOS Plugins
@@ -121,7 +121,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: plugins-macos-${{ matrix.arch }}
-          path: build/macos-${{ matrix.arch }}/plugins/macos-*/**/*.plugin
+          path: build/macos-${{ matrix.arch }}/plugins/macos-${{ matrix.arch }}/
 
   build-emscripten:
     name: Build Emscripten Plugins
@@ -158,7 +158,7 @@ jobs:
           name: plugins-emscripten
           # we only want the .wasms
           path: |
-              build/emscripten/*/**.wasm
+              build/emscripten/plugins/emscripten/
               build/emscripten/web
 
   deploy:
