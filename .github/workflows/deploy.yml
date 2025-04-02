@@ -200,7 +200,7 @@ jobs:
           done
 
           # Organize Emscripten build
-          if [ -d plugins/plugins-emscripten ]; then
+          if [ -d plugins/plugins-emscripten/artifacts/plugins ]; then
             mkdir -p plugins_combined/emscripten
             cp -r plugins/plugins-emscripten/artifacts/plugins/* plugins_combined/
           fi
