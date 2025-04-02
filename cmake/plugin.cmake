@@ -4,6 +4,9 @@ if (NOT TARGET lib_wrap)
   get_target_property(lib_incl lib INTERFACE_INCLUDE_DIRECTORIES)
   target_include_directories(lib_wrap INTERFACE ${lib_incl})
   # windows gross
+  # this isnt too big of a deal since lib is a shared library
+  # but if we didnt have this, emscripten would try to link lib_wrap directly with 
+  # lib and bloat by ~20MB
   if (WIN32)
     target_link_libraries(lib_wrap INTERFACE lib)
   endif()
