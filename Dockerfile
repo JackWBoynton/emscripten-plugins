@@ -21,4 +21,6 @@ RUN uv sync --frozen --project api
 
 EXPOSE ${PORT}
 
-CMD ["REGISTRY_BASE_PATH=./server/plugins EMSCRIPTEN_BUILD_WEBDIR=./server/web uv --project api run api run"]
+ENV REGISTRY_BASE_PATH=./server/plugins \
+    EMSCRIPTEN_BUILD_WEBDIR=./server/web
+CMD ["uv --project api", "run", "api", "run"]
