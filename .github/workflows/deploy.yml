@@ -114,6 +114,7 @@ jobs:
           cmake ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
           cmake --build .
           cd ../..
+          brew install tree
           tree -a build/macos-${{ matrix.arch }}
       
       - name: Upload macOS Plugin Artifact for ${{ matrix.arch }}
