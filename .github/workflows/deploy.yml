@@ -36,7 +36,7 @@ jobs:
       - name: Upload Linux Plugin Artifact for ${{ matrix.arch }}
         uses: actions/upload-artifact@v4
         with:
-          name: plugins-linux-${{ matrix.arch }}
+          name: linux-${{ matrix.arch }}
           path: build/linux-${{ matrix.arch }}/artifacts/plugins/linux-${{ matrix.arch }}/
 
   build-windows:
@@ -90,7 +90,7 @@ jobs:
     - name: Upload Windows Plugin Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: plugins-windows
+        name: windows
         path: build/windows/plugins/windows-amd64/
 
   build-macos:
@@ -118,7 +118,7 @@ jobs:
       - name: Upload macOS Plugin Artifact for ${{ matrix.arch }}
         uses: actions/upload-artifact@v4
         with:
-          name: plugins-macos-${{ matrix.arch }}
+          name: macos-${{ matrix.arch }}
           path: build/macos-${{ matrix.arch }}/plugins/macos-${{ matrix.arch }}/
 
   build-emscripten:
@@ -153,7 +153,7 @@ jobs:
       - name: Upload Emscripten Plugin Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: plugins-emscripten
+          name: emscripten
           # we only want the .wasms
           path: |
               build/emscripten/plugins/emscripten/
@@ -182,27 +182,27 @@ jobs:
           tree -a plugins
 
           # Organize Linux builds (amd64 and arm64)
-          for dir in plugins/plugins-linux-amd64 plugins/plugins-linux-arm64; do
+          for dir in plugins/linux-amd64 plugins/linux-arm64; do
             if [ -d "$dir" ]; then
-              cp -r "$dir"/artifacts/plugins/* plugins_combined/
+              cp -r "$dir" plugins_combined/
             fi
           done
 
           # Organize Windows build
-          if [ -d plugins/plugins-windows ]; then
-            cp -r plugins/plugins-windows/* plugins_combined/
+          if [ -d plugins/windows ]; then
+            cp -r plugins/windows/* plugins_combined/
           fi
 
           # Organize macOS builds (x86_64 and arm64)
-          if [ -d "plugins/plugins-macos-arm64" ]; then
+          if [ -d "plugins/macos-arm64" ]; then
             mkdir -p plugins_combined/macos-arm64
-            cp plugins/plugins-macos-arm64/*.plugin plugins_combined/macos-arm64/
+            cp plugins/macos-arm64/*.plugin plugins_combined/macos-arm64/
           fi
 
           # Organize Emscripten build
-          if [ -d plugins/plugins-emscripten/plugins ]; then
+          if [ -d plugins/emscripten/plugins ]; then
             mkdir -p plugins_combined/emscripten
-            cp -r plugins/plugins-emscripten/plugins/* plugins_combined/
+            cp -r plugins/emscripten/plugins/* plugins_combined/
           fi
 
           # Copy the combined plugins into the server directory (adjust the path as needed)
@@ -211,7 +211,7 @@ jobs:
 
           # copy built web dir to server dir
           mkdir -p server/web
-          cp -r plugins/plugins-emscripten/web/* server/web/
+          cp -r plugins/emscripten/web/* server/web/
 
           tree -a server
 
