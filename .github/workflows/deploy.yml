@@ -179,6 +179,7 @@ jobs:
       - name: Organize and Combine Plugins
         run: |
           mkdir -p plugins_combined
+          tree -a plugins
 
           # Organize Linux builds (amd64 and arm64)
           for dir in plugins/plugins-linux-amd64 plugins/plugins-linux-arm64; do
