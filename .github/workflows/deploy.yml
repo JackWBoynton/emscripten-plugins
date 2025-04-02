@@ -194,9 +194,10 @@ jobs:
           fi
 
           # Organize macOS builds (x86_64 and arm64)
-          for dir in plugins/plugins-macos-x86_64 plugins/plugins-macos-arm64; do
-            if [ -d "$dir" ]; then
-              cp -r "$dir" plugins_combined/
+          for dir in plugins/plugins-macos-x86_64 ; do
+            if [ -d "plugins/plugins-macos-arm64" ]; then
+              mkdir -p plugins_combined/macos-arm64
+              cp plugins/plugins-macos-arm64/*.plugin plugins_combined/macos-arm64/
             fi
           done
 
