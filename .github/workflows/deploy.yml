@@ -114,8 +114,6 @@ jobs:
           cmake ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
           cmake --build .
           cd ../..
-          brew install tree
-          tree -a build/macos-${{ matrix.arch }}
       
       - name: Upload macOS Plugin Artifact for ${{ matrix.arch }}
         uses: actions/upload-artifact@v4
@@ -186,26 +184,26 @@ jobs:
           # Organize Linux builds (amd64 and arm64)
           for dir in plugins/plugins-linux-amd64 plugins/plugins-linux-arm64; do
             if [ -d "$dir" ]; then
-              cp -r "$dir"/artifacts/plugins/* plugins_combined/
+              cp -r "$dir" plugins_combined/
             fi
           done
 
           # Organize Windows build
           if [ -d plugins/plugins-windows ]; then
-            cp -r plugins/plugins-windows/artifacts/plugins/* plugins_combined/
+            cp -r plugins/plugins-windows/* plugins_combined/
           fi
 
           # Organize macOS builds (x86_64 and arm64)
           for dir in plugins/plugins-macos-x86_64 plugins/plugins-macos-arm64; do
             if [ -d "$dir" ]; then
-              cp -r "$dir"/artifacts/plugins/* plugins_combined/
+              cp -r "$dir" plugins_combined/
             fi
           done
 
           # Organize Emscripten build
           if [ -d plugins/plugins-emscripten/artifacts/plugins ]; then
             mkdir -p plugins_combined/emscripten
-            cp -r plugins/plugins-emscripten/artifacts/plugins/* plugins_combined/
+            cp -r plugins/plugins-emscripten/plugins/* plugins_combined/
           fi
 
           # Copy the combined plugins into the server directory (adjust the path as needed)
