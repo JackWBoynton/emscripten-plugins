@@ -1,4 +1,3 @@
-import os
 from litestar import Router
 
 from . import plugins

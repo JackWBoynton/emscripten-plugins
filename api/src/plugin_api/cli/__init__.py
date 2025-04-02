@@ -1,4 +1,3 @@
-import enum
 import logging
 
 import click
@@ -11,6 +10,7 @@ from ..app import app
 from .utils import create_registry
 
 log = logging.getLogger("plugin_api.cli")
+
 
 @click.group(
     help=f"Emscripten Plugin Registry API v{__version__}",
@@ -35,5 +35,6 @@ def cli(verbose: bool) -> None:
 def run(host: str, port: int) -> None:
     log.info(f"Starting server on {host}:{port}")
     uvicorn.run(app, host=host, port=port)
+
 
 cli.add_command(create_registry)

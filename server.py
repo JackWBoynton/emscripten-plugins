@@ -17,7 +17,7 @@ def get_sha1(file_path) -> str:
     BUF_SIZE = 65536
     sha1 = hashlib.sha1()
 
-    with open(file_path, 'rb') as f:
+    with open(file_path, "rb") as f:
         while True:
             data = f.read(BUF_SIZE)
             if not data:
@@ -25,6 +25,7 @@ def get_sha1(file_path) -> str:
             sha1.update(data)
 
     return sha1.hexdigest()
+
 
 class PluginServerHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -66,7 +67,14 @@ class PluginServerHandler(http.server.SimpleHTTPRequestHandler):
                 for f in os.listdir(PLUGIN_DIR):
                     if f.endswith(".plugin") or f.endswith(".wasm"):
                         version = "fixme"
-                        files.append(dict(filename=f, size=os.path.getsize(os.path.join(PLUGIN_DIR, f)), sha1=get_sha1(os.path.join(PLUGIN_DIR, f)), version=version))
+                        files.append(
+                            dict(
+                                filename=f,
+                                size=os.path.getsize(os.path.join(PLUGIN_DIR, f)),
+                                sha1=get_sha1(os.path.join(PLUGIN_DIR, f)),
+                                version=version,
+                            )
+                        )
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
@@ -100,7 +108,9 @@ if __name__ == "__main__":
         f"Starting server on port {PORT}, serving from {os.path.abspath(sys.argv[1])}"
     )
     print(f"Plugins directory: {os.path.abspath(PLUGIN_DIR)}")
-    print(f"plugins: {[x for x in os.listdir(PLUGIN_DIR) if x.endswith('.plugin') or x.endswith('.wasm')]}")
+    print(
+        f"plugins: {[x for x in os.listdir(PLUGIN_DIR) if x.endswith('.plugin') or x.endswith('.wasm')]}"
+    )
     print("Press Ctrl+C to stop the server.")
 
     os.chdir(os.path.abspath(sys.argv[1]))

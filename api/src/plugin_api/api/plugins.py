@@ -30,6 +30,7 @@ from litestar.response import Stream
 #           - pluginA.instroplug | pluginA.instroplug_lib
 #   - pluginB
 
+
 class Plugin(BaseModel):
     name: str
     size: int
@@ -44,11 +45,12 @@ class Plugin(BaseModel):
             "version": self.version,
         }
 
+
 def get_sha1(file_path) -> str:
     BUF_SIZE = 65536
     sha1 = hashlib.sha1()
 
-    with open(file_path, 'rb') as f:
+    with open(file_path, "rb") as f:
         while True:
             data = f.read(BUF_SIZE)
             if not data:
@@ -57,8 +59,10 @@ def get_sha1(file_path) -> str:
 
     return sha1.hexdigest()
 
+
 REGISTRY_BASE_PATH = os.getenv("REGISTRY_BASE_PATH", os.path.abspath("./plugins"))
 print(os.listdir(REGISTRY_BASE_PATH))
+
 
 def get_file_from_registry(arch: str, plugin_name: str) -> BytesIO:
     """
@@ -74,10 +78,11 @@ def get_file_from_registry(arch: str, plugin_name: str) -> BytesIO:
     path = os.path.join(REGISTRY_BASE_PATH, arch, plugin_name)
     if not os.path.exists(path):
         raise NotFoundException(f"Plugin {plugin_name} for {arch} not found.")
-    
+
     with open(path, "rb") as f:
         return BytesIO(f.read())
-    
+
+
 def get_plugin_list() -> dict:
     """
     Retrieve the list of all plugins in the registry.
@@ -94,19 +99,24 @@ def get_plugin_list() -> dict:
         if os.path.isdir(arch_path):
             plugins[arch] = []
             for plugin_name in os.listdir(arch_path):
-                if not os.path.isdir(os.path.join(arch_path, plugin_name)):
-                    plugin = Plugin(name=plugin_name, size=os.path.getsize(os.path.join(arch_path, plugin_name)), sha1=get_sha1(os.path.join(arch_path, plugin_name)), version=plugin_name)
+                if not os.path.isdir(os.path.join(arch_path, plugin_name)) and (
+                    plugin_name.endswith(".plugin") or plugin_name.endswith(".plugin.wasm")
+                ):
+                    plugin = Plugin(
+                        name=plugin_name,
+                        size=os.path.getsize(os.path.join(arch_path, plugin_name)),
+                        sha1=get_sha1(os.path.join(arch_path, plugin_name)),
+                        version=plugin_name,
+                    )
                     plugins[arch].append(plugin)
     return plugins
+
 
 print(get_plugin_list())
 
 
 @get("/plugins/{arch:str}/{plugin_name:str}")
-async def fetch_plugin(
-    arch: str,
-    plugin_name: str
-) -> Stream:
+async def fetch_plugin(arch: str, plugin_name: str) -> Stream:
     """
     Fetch and stream a specific plugin to the client.
 
@@ -119,6 +129,7 @@ async def fetch_plugin(
     """
     return Stream(get_file_from_registry(arch, plugin_name))
 
+
 @get("/plugins")
 async def list_plugins() -> dict:
     """
@@ -128,6 +139,7 @@ async def list_plugins() -> dict:
         dict: The entire plugin registry.
     """
     return get_plugin_list()
+
 
 @get("/plugins/{arch:str}")
 async def list_plugins_arch(arch: str) -> dict:
