@@ -18,9 +18,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 COPY . .
 RUN uv sync --frozen --project api
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-RUN chown -R appuser:appgroup /app
-USER appuser
 
 EXPOSE ${PORT}
 
