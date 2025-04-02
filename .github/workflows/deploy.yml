@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: plugins-linux-${{ matrix.arch }}
-          path: build/linux-${{ matrix.arch }}/plugins/linux-${{ matrix.arch }}/
+          path: build/linux-${{ matrix.arch }}/artifacts/plugins/linux-${{ matrix.arch }}/
 
   build-windows:
     runs-on: windows-2022
@@ -184,7 +184,7 @@ jobs:
           # Organize Linux builds (amd64 and arm64)
           for dir in plugins/plugins-linux-amd64 plugins/plugins-linux-arm64; do
             if [ -d "$dir" ]; then
-              cp -r "$dir" plugins_combined/
+              cp -r "$dir"/artifacts/plugins/* plugins_combined/
             fi
           done
 
@@ -194,12 +194,10 @@ jobs:
           fi
 
           # Organize macOS builds (x86_64 and arm64)
-          for dir in plugins/plugins-macos-x86_64 ; do
-            if [ -d "plugins/plugins-macos-arm64" ]; then
-              mkdir -p plugins_combined/macos-arm64
-              cp plugins/plugins-macos-arm64/*.plugin plugins_combined/macos-arm64/
-            fi
-          done
+          if [ -d "plugins/plugins-macos-arm64" ]; then
+            mkdir -p plugins_combined/macos-arm64
+            cp plugins/plugins-macos-arm64/*.plugin plugins_combined/macos-arm64/
+          fi
 
           # Organize Emscripten build
           if [ -d plugins/plugins-emscripten/plugins ]; then

@@ -30,8 +30,8 @@
 std::string GetAPIURL() {
     std::string API_URL = "";
     if (!std::getenv("API_URL")) {
-        printf("API_URL not set, using default %s\n", "https://plugins-dev-4cd350c041fa.herokuapp.com/plugins");
-        API_URL = "https://plugins-dev-4cd350c041fa.herokuapp.com/plugins";
+        printf("API_URL not set, using default %s\n", "https://plugins-dev-4cd350c041fa.herokuapp.com/api");
+        API_URL = "https://plugins-dev-4cd350c041fa.herokuapp.com/api";
     } else {
         API_URL = std::string(std::getenv("API_URL"));
     }

@@ -137,4 +137,4 @@ async def list_plugins_arch(arch: str) -> dict:
     Returns:
         dict: The entire plugin registry.
     """
-    return get_plugin_list().get(arch, {})
+    return get_plugin_list().get(arch, [])
