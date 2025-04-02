@@ -23,4 +23,6 @@ EXPOSE ${PORT}
 
 ENV REGISTRY_BASE_PATH=./server/plugins \
     EMSCRIPTEN_BUILD_WEBDIR=./server/web
-CMD ["uv --project api", "run", "api", "run"]
+
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["uv --project api run api run"]
