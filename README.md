@@ -34,6 +34,9 @@ This framework is built around a simple concept:
 
 By organizing your application in this way, you can focus on developing new features as plugins that won’t require you to recompile or modify the host each time.
 
+## Web Demo
+A simple demo is available at [https://plugins-dev-4cd350c041fa.herokuapp.com/api/static/](https://plugins-dev-4cd350c041fa.herokuapp.com/api/static/), for the emscripten client. The native clients are not hosted but they can be built and they will attempt to load the same plugins from that API.
+
 ## Core Components
 
 ### AppHost
@@ -56,6 +59,8 @@ Found in the `plugins/` directory.
 - Each plugin implements `pluginMain()`.  
 - Plugins can optionally add an ImGui callback by calling `PluginManager::getInstance().registerRenderable(...)`.  
 - Example: **plugin_a** shows how to add your own UI text in an ImGui window; **plugin_b** logs to console only.
+- Once downloaded, plugins are stored on the local filesystem and are reloaded on restart. This also applies for the emscripten client but plugins are stored in the IDBFS filesystem so they persist across page reloads.
+- If plugins are updated, the clients will try to validate the SHA1 hash of the plugin with the API and if it is different, it will not be loaded.
 
 ## Project Layout
 ```
