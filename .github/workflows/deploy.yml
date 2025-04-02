@@ -184,30 +184,28 @@ jobs:
           for dir in plugins/plugins-linux-amd64 plugins/plugins-linux-arm64; do
             if [ -d "$dir" ]; then
               arch=$(basename "$dir" | sed 's/plugins-linux-//')
-              mkdir -p plugins_combined/$arch
-              cp -r "$dir"/* plugins_combined/$arch/
+              mkdir -p plugins_combined/linux_$arch
+              cp -r "$dir"/* plugins_combined/linux_$arch/
             fi
           done
 
           # Organize Windows build
           if [ -d plugins/plugins-windows ]; then
             mkdir -p plugins_combined/windows
-            cp -r plugins/plugins-windows/* plugins_combined/windows/
+            cp -r plugins/plugins-windows/* plugins_combined/
           fi
 
           # Organize macOS builds (x86_64 and arm64)
           for dir in plugins/plugins-macos-x86_64 plugins/plugins-macos-arm64; do
             if [ -d "$dir" ]; then
-              arch=$(basename "$dir" | sed 's/plugins-macos-//')
-              mkdir -p plugins_combined/$arch
-              cp -r "$dir"/* plugins_combined/$arch/
+              cp -r "$dir"/* plugins_combined/
             fi
           done
 
           # Organize Emscripten build
           if [ -d plugins/plugins-emscripten ]; then
             mkdir -p plugins_combined/emscripten
-            cp -r plugins/plugins-emscripten/*/**.wasm plugins_combined/emscripten/
+            cp -r plugins/plugins-emscripten/* plugins_combined/
           fi
 
           # Copy the combined plugins into the server directory (adjust the path as needed)
@@ -227,6 +225,7 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 
       - name: Build and Push Docker Image to Heroku
+        # we have to make sure this includes the server directory
         run: |
           docker buildx build \
             --platform linux/amd64 \

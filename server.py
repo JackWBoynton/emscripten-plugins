@@ -6,7 +6,7 @@ import os
 import json
 from urllib.parse import urlparse
 
-PORT = 8000
+PORT = int(os.getenv("PORT", 8000))
 
 # Directory that holds plugin files
 PLUGIN_DIR = os.getenv("PLUGIN_DIR", os.path.join(os.getcwd(), "server/plugins"))

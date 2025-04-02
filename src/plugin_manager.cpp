@@ -1,4 +1,5 @@
 #include "lib/plugin_manager.h"
+#include "lib/plugin_api.h"
 
 // Ensure standard library headers are included
 #include <string>
@@ -26,13 +27,25 @@
 #include <dlfcn.h>
 #endif
 
-#if defined(EMSCRIPTEN)
-static const char* PLUGIN_LIST_URL = "http://localhost:8000/plugins";
-static const char* PLUGIN_BASE_URL = "http://localhost:8000/plugins/";
-#else
-static const char* PLUGIN_LIST_URL = "http://localhost:8000/plugins";
-static const char* PLUGIN_BASE_URL = "http://localhost:8000/plugins/";
-#endif
+std::string GetAPIURL() {
+    std::string API_URL = "";
+    if (!std::getenv("API_URL")) {
+        printf("API_URL not set, using default %s\n", "https://plugins-dev-4cd350c041fa.herokuapp.com/plugins");
+        API_URL = "https://plugins-dev-4cd350c041fa.herokuapp.com/plugins";
+    } else {
+        API_URL = std::string(std::getenv("API_URL"));
+    }
+
+    return API_URL;
+}
+
+static std::string GetPluginListUrl() {
+    return GetAPIURL() + "/plugins/" + getPluginArchitecture();
+}
+
+static std::string GetPluginBaseUrl() {
+    return GetPluginListUrl() + "/";
+}
 
 #if defined(__APPLE__)
 static const char* PLUGIN_DEST = "~/Library/Application Support/plugin_dev/plugins/";
@@ -114,7 +127,7 @@ void PluginManager::parsePluginList(const std::string &jsonData)
             for (const auto& item : json) {
                 if (item.is_object()) {
                     pluginList_.emplace_back(LoadablePlugin{
-                        item.value("filename", ""),
+                        item.value("name", ""),
                         item.value("size", 0UL),
                         item.value("sha1", ""),
                         item.value("version", "")
@@ -162,7 +175,7 @@ void PluginManager::fetchPluginList()
     attr.onsuccess = onFetchListSuccess;
     attr.onerror   = onFetchListFailed;
     attr.userData  = this;
-    emscripten_fetch(&attr, PLUGIN_LIST_URL);
+    emscripten_fetch(&attr, GetPluginListUrl().c_str());
 }
 
 #else  // Native
@@ -175,7 +188,7 @@ void PluginManager::fetchPluginList()
         return;
     }
     std::string response;
-    curl_easy_setopt(curl, CURLOPT_URL, PLUGIN_LIST_URL);
+    curl_easy_setopt(curl, CURLOPT_URL, GetPluginListUrl().c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
       +[](char* ptr, size_t size, size_t nmemb, void* userdata)->size_t {
          auto* resp = (std::string*)userdata;
@@ -394,7 +407,7 @@ void PluginManager::downloadAndLoadPlugin(LoadablePlugin &plugin)
     auto* ctx = new DownloadCtx();
     ctx->manager = this;
 
-    std::string url = std::string(PLUGIN_BASE_URL) + plugin.name;
+    std::string url = GetPluginBaseUrl() + plugin.name;
     std::string localPath = PLUGIN_DEST + plugin.name;
     std::cout << "Downloading plugin from: " + url + " to " + localPath << std::endl;
     ctx->localPath = localPath;
@@ -415,7 +428,7 @@ void PluginManager::downloadAndLoadPlugin(LoadablePlugin &plugin)
 void PluginManager::downloadAndLoadPlugin(LoadablePlugin &plugin)
 {
     if (plugin.name.empty()) return;
-    std::string url = std::string(PLUGIN_BASE_URL) + plugin.name;
+    std::string url = GetPluginBaseUrl() + plugin.name;
     std::filesystem::path output_loc = PLUGIN_DEST + plugin.name;
     log("Downloading plugin from: " + url + " to " + output_loc.string());
 

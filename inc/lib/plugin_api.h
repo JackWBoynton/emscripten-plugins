@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #if defined(EMSCRIPTEN)
 #include "emscripten.h"
 #else
@@ -13,7 +15,12 @@ extern "C" {
 
 int pluginMain();
 
-inline const char* getPluginArchitecture() {
+
+#ifdef __cplusplus
+}
+#endif
+
+inline std::string getPluginArchitecture() {
   #if defined(EMSCRIPTEN)
     return "emscripten";
   #elif defined(__APPLE__)
@@ -40,7 +47,3 @@ inline const char* getPluginArchitecture() {
 
   #endif
 }
-
-#ifdef __cplusplus
-}
-#endif

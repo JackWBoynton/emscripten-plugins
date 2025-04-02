@@ -48,7 +48,9 @@ We are also using goatcounter for simple stats
 
 <script type='text/javascript'>
     var Module = {
-        preRun: [],
+        preRun: [function() {
+            ENV.API_URL = window.location.origin + '/api';
+        }],
         postRun: [],
         print: (function() {
             return function(text) {

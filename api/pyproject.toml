@@ -1,0 +1,79 @@
+[build-system]
+requires = ["pdm-pep517"]
+build-backend = "pdm.pep517.api"
+
+[project]
+name = "emscripten-plugins-api"
+description = "Emscripten Plugin Registry API"
+authors = [
+    { email = "jboynton1999@gmail.com", name = "Jack Boynton" },
+]
+dynamic = ["version"]
+requires-python = ">3.10, <=3.14"
+# add new dependencies with pdm add <dependency>
+dependencies = [
+    "deprecated>=1.2.13",
+    "click>=8.1.3",
+    "litestar[pydantic]>=2.12.1",
+    "uvicorn>=0.32.0",
+    "requests>=2.32.3",
+]
+
+[project.scripts]
+api = "plugin_api.__main__:cli"  # TODO not needed for libraries
+
+[tool.mypy]
+explicit_package_bases = true  # find namespace packages in the current dir
+files = ["."]  # check all python files
+strict = true  # enable stricter type checking
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "src"]
+addopts = "--doctest-modules"
+
+[tool.pdm]
+build.includes = ["src"]
+version.source = "scm"
+
+[tool.pdm.dev-dependencies]
+# Add new dev dependencies with pdm add -d <dependency>
+dev = [
+    "mypy>=0.971",
+    "pytest-cov>=3.0.0",
+    "pytest-xdist>=2.5.0",
+    "pytest>=7.1.2",
+    "types-deprecated>=1.2.9",
+    "ruff>=0.1.5",
+]
+docs = [
+    # base tool
+    "mkdocs>=1.3.1",
+    # theme
+    "mkdocs-material>=8.3.9",
+    # api reference
+    "mkdocstrings[python]>=0.19.0",
+    "mkdocs-gen-files>=0.3.5",
+    "mkdocs-literate-nav>=0.4.1",
+    "mkdocs-section-index>=0.3.4",
+    # include files
+    "mkdocs-include-markdown-plugin>=3.6.1",
+    # cli reference
+    "mkdocs-click>=0.8.0",
+]
+
+[tool.ruff]  # See https://github.com/astral-sh/ruff#configuration
+line-length = 120
+target-version = "py310"  # defaults to 3.8, but our CI default is 3.10 now
+
+[tool.ruff.lint]
+# select = ["F", "E", "I001", "W", "D"]  # TODO: change defaults as needed
+# missing blank line after last section, to me is is needless whitespace
+ignore = ["D413"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.pdm.scripts]
+format.shell = "ruff format src tests"
+lint.shell = "ruff check src tests"
+lint-fix.shell = "ruff check src tests --fix"

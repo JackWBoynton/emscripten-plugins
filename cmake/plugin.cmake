@@ -1,4 +1,9 @@
 
+if (NOT TARGET lib_wrap)
+  add_library(lib_wrap INTERFACE)
+  get_target_property(lib_incl lib INTERFACE_INCLUDE_DIRECTORIES)
+  target_include_directories(lib_wrap INTERFACE ${lib_incl})
+endif()
 
 function(add_plugin parent ${ARGN})
   set(options LIBRARY_PLUGIN)
@@ -31,7 +36,9 @@ function(add_plugin parent ${ARGN})
   endif()
 
   message(STATUS "Adding plugin ${PLUGIN_NAME} to ${parent}")
-  project(${PLUGIN_NAME})
+
+  # project(${PLUGIN_NAME})
+
   if (EMSCRIPTEN)
     add_executable(${PLUGIN_NAME} ${PLUGIN_SOURCES})
   else()
@@ -46,8 +53,7 @@ function(add_plugin parent ${ARGN})
                PREFIX ""
                SUFFIX ${PLUGIN_SUFFIX}.wasm
   )
-  target_compile_definitions(${PLUGIN_NAME} PUBLIC DEBUG=1)
-  target_link_options(${PLUGIN_NAME} PRIVATE -sSIDE_MODULE=1 -O0 -sWASM=1 -sEXPORT_ALL=1 --no-entry -sASSERTIONS=1 -fwasm-exceptions -v -sERROR_ON_UNDEFINED_SYMBOLS=0 -gsource-map)
+  target_link_options(${PLUGIN_NAME} PRIVATE -sSIDE_MODULE=2 -O3 -sWASM=1 -sEXPORT_ALL=0 --no-entry -sERROR_ON_UNDEFINED_SYMBOLS=0 -Wno-limited-postlink-optimizations -flto -fno-rtti -fno-exceptions -sDISABLE_EXCEPTION_CATCHING=1)
   else()
     set_target_properties(
     ${PLUGIN_NAME}
@@ -61,7 +67,7 @@ function(add_plugin parent ${ARGN})
   target_include_directories(${PLUGIN_NAME} PUBLIC ${PLUGIN_INCLUDES})
   target_include_directories(${PLUGIN_NAME} SYSTEM PUBLIC ${PLUGIN_SYSTEM_INCLUDES})
   target_link_libraries(${PLUGIN_NAME} PUBLIC ${PLUGIN_LIBRARIES})
-  target_link_libraries(${PLUGIN_NAME} PRIVATE lib)
+  target_link_libraries(${PLUGIN_NAME} PRIVATE lib_wrap)
 
   target_compile_definitions(${PLUGIN_NAME} PRIVATE PLUGIN_NAME=${PLUGIN_NAME})
 

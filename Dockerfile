@@ -16,10 +16,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY . .
+RUN pip install ./api
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 RUN chown -R appuser:appgroup /app
 USER appuser
 
 EXPOSE ${PORT}
 
-CMD ["python3", "server.py", "/app/server"]
+CMD ["python3", "-m", "plugins_api", "run"]
