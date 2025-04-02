@@ -3,6 +3,10 @@ if (NOT TARGET lib_wrap)
   add_library(lib_wrap INTERFACE)
   get_target_property(lib_incl lib INTERFACE_INCLUDE_DIRECTORIES)
   target_include_directories(lib_wrap INTERFACE ${lib_incl})
+  # windows gross
+  if (WIN32)
+    target_link_libraries(lib_wrap INTERFACE lib)
+  endif()
 endif()
 
 function(add_plugin parent ${ARGN})
