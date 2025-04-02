@@ -119,7 +119,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: plugins-macos-${{ matrix.arch }}
-          path: build/macos-${{ matrix.arch }}/*/**.plugin
+          path: build/macos-${{ matrix.arch }}/plugins/macos-${{ matrix.arch }}/
 
   build-emscripten:
     name: Build Emscripten Plugins
