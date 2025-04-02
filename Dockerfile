@@ -10,17 +10,18 @@ WORKDIR /artifacts
 COPY --from=build_plugins /app/build .
 
 
-FROM python:3.11-alpine as server
+FROM python:3.12-slim-bookworm as server
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY . .
-RUN pip install ./api
+RUN uv sync --frozen --project api
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 RUN chown -R appuser:appgroup /app
 USER appuser
 
 EXPOSE ${PORT}
 
-CMD ["python3", "-m", "plugins_api", "run"]
+CMD ["REGISTRY_BASE_PATH=./server/plugins EMSCRIPTEN_BUILD_WEBDIR=./server/web uv --project api run api run"]

@@ -57,7 +57,7 @@ def get_sha1(file_path) -> str:
 
     return sha1.hexdigest()
 
-REGISTRY_BASE_PATH = os.getenv("REGISTRY_BASE_PATH", "./plugins")
+REGISTRY_BASE_PATH = os.getenv("REGISTRY_BASE_PATH", os.path.abspath("./plugins"))
 print(os.listdir(REGISTRY_BASE_PATH))
 
 def get_file_from_registry(arch: str, plugin_name: str) -> BytesIO:
